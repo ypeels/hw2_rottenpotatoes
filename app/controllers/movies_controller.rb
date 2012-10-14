@@ -7,6 +7,23 @@ class MoviesController < ApplicationController
   end
 
   def index
+
+    # HW2-3 error checking: initialize session. ALWAYS ok to do this, right?
+    if params[:sort] then session[:sort] = params[:sort] end
+    if params[:ratings] then session[:ratings] = params[:ratings] end
+    
+    # if user has no requested value, revert to the saved value if it exists
+    # (annoying? can't disable sort, even via URI)
+    if session[:sort] && !params[:sort]
+      flash.keep # for user notifications
+      redirect_to movies_path(:sort => session[:sort], :ratings => params[:ratings])
+      return
+    end
+    if session[:ratings] && !params[:ratings]
+      flash.keep # for user notifications
+      redirect_to movies_path(:ratings => session[:ratings], :sort => params[:sort])
+      return
+    end
   
     # initial value for hash shared by HW2-1 (title/date sort) and HW2-2 (rating filter)
     options = {}
@@ -40,7 +57,9 @@ class MoviesController < ApplicationController
     @rating_checked = {}
     
     # HW2-2 special case: initialize with all ratings checked.
-    if fresh_index
+    #if fresh_index
+    # HW2-3 modified to simply check all ratings if none were checked
+    if !params[:ratings]
       @all_ratings.each { |rating| @rating_checked[rating] = true }
     end    
     
@@ -53,7 +72,6 @@ class MoviesController < ApplicationController
 
       # display only movies with checked ratings      
       options[:conditions] = {:rating => all_checked_ratings}
-      
     end
 
     # one unified database query that combines HW2-1 (title or date sort) and HW2-2 (ratings filter)
