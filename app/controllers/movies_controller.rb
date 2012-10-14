@@ -11,6 +11,7 @@ class MoviesController < ApplicationController
     
     # HW 2-1B params[:sort] from index.html.haml
     # figured out what to do from rdb + Google!
+    # http://apidock.com/rails/ActiveResource/Base
     if params[:sort]      
       if params[:sort] == "title"
         @movies = Movie.order("title")
