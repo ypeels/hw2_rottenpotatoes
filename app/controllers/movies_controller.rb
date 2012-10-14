@@ -12,31 +12,13 @@ class MoviesController < ApplicationController
     options = {}
     fresh_index = !params[:sort] && !params[:ratings]
     
-    if !fresh_index
-      # HW2-2 stupid but more flexible kludge: persist params across calls via flash...
-      # this lets me use HW2-1's logic essentially unmodified... (must be above it, though)
-      if flash[:sort] and !params[:sort]
-        params[:sort] = flash[:sort]
-      end
-      if flash[:ratings] and !params[:ratings]
-        params[:ratings] = flash[:ratings]
-      end
-    else
-      # HW2-2 selectively "nuke" flash if root page called (no ratings or sort option)    
-      # no effect for initial call, right?
-      flash.delete :sort
-      flash.delete :ratings  
-    end 
-   
-    
-    # this doesn't look very good, since all my code is in the CONTROLLER (Movie itself is pretty barren)
+    # this all doesn't look very good, since all my code is in the CONTROLLER (Movie itself is pretty barren)
     
     # HW 2-1B: sort by title or date
     # params[:sort] originally from index.html.haml
     # figured out what to do from rdb + Google!
     # http://apidock.com/rails/ActiveResource/Base
     if params[:sort]  
-      flash[:sort] = params[:sort]   # to the kludge! 
       if params[:sort] == "title"
         options[:order] = "title"
         @title_hilite = "hilite"
@@ -64,7 +46,6 @@ class MoviesController < ApplicationController
     
     # HW2-2 - "Refresh" clicked with at least one rating checked    
     if params[:ratings] != nil
-      flash[:ratings] = params[:ratings]  # to the kludge!
       all_checked_ratings = params[:ratings].keys
       
       # persist checks after Refresh...(hmmm)
