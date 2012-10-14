@@ -8,18 +8,40 @@ class MoviesController < ApplicationController
 
   def index
   
-    # INITIALIZE to default: all movies (inefficient, because of re-query? meh)
-    @movies = Movie.all
+    # initial value for hash shared by HW2-1 (title/date sort) and HW2-2 (rating filter)
+    options = {}
+    fresh_index = !params[:sort] && !params[:ratings]
     
-    # HW 2-1B params[:sort] from index.html.haml
+    if !fresh_index
+      # HW2-2 stupid but more flexible kludge: persist params across calls via flash...
+      # this lets me use HW2-1's logic essentially unmodified... (must be above it, though)
+      if flash[:sort] and !params[:sort]
+        params[:sort] = flash[:sort]
+      end
+      if flash[:ratings] and !params[:ratings]
+        params[:ratings] = flash[:ratings]
+      end
+    else
+      # HW2-2 selectively "nuke" flash if root page called (no ratings or sort option)    
+      # no effect for initial call, right?
+      flash.delete :sort
+      flash.delete :ratings  
+    end 
+   
+    
+    # this doesn't look very good, since all my code is in the CONTROLLER (Movie itself is pretty barren)
+    
+    # HW 2-1B: sort by title or date
+    # params[:sort] originally from index.html.haml
     # figured out what to do from rdb + Google!
     # http://apidock.com/rails/ActiveResource/Base
-    if params[:sort]      
+    if params[:sort]  
+      flash[:sort] = params[:sort]   # to the kludge! 
       if params[:sort] == "title"
-        @movies = Movie.order("title")
+        options[:order] = "title"
         @title_hilite = "hilite"
       elsif params[:sort] == "release_date"
-        @movies = Movie.order("release_date")
+        options[:order] = "release_date"
         @date_hilite = "hilite"
       else
         # no, this persists one screen too many; don't feel like figuring out refresh logic...
@@ -27,32 +49,34 @@ class MoviesController < ApplicationController
         Rails.logger.warn "Error: unsupported sort type: " + params[:sort]
       end
     end
+
+
+    # HW2-2 - instance variable to carry possible ratings from Model (app/models/movie.rb) to View
+    @all_ratings = Movie.all_ratings  
+
+    # HW2-2 - initialize horrible instance variable...
+    @rating_checked = {}
     
-    # HW2-2 - pump possible ratings from Model (app/models/movie.rb) to View
-    @all_ratings = Movie.all_ratings
+    # HW2-2 special case: initialize with all ratings checked.
+    if fresh_index
+      @all_ratings.each { |rating| @rating_checked[rating] = true }
+    end    
     
     # HW2-2 - "Refresh" clicked with at least one rating checked    
-    @rating_checked = {}
     if params[:ratings] != nil
+      flash[:ratings] = params[:ratings]  # to the kludge!
       all_checked_ratings = params[:ratings].keys
       
       # persist checks after Refresh...(hmmm)
       all_checked_ratings.each { |rating| @rating_checked[rating] = true }
 
       # display only movies with checked ratings      
-      @movies = Movie.find( :all, :conditions => {:rating => all_checked_ratings} )
-     # debugger
-#      @movies = []
-#      params[:ratings].keys.each do |rating| 
-#        @movies << Movie.find(:all, :conditions => { :rating => "#{rating}" } )
-#      end
-     
-
-
-    else
-      # boundary case: toggle all checkboxes by default (or if all unchecked
-      @all_ratings.each { |rating| @rating_checked[rating] = true }
+      options[:conditions] = {:rating => all_checked_ratings}
+      
     end
+
+    # one unified database query that combines HW2-1 (title or date sort) and HW2-2 (ratings filter)
+    @movies = Movie.find(:all, options)
     
   end
 
