@@ -8,6 +8,13 @@ class MoviesController < ApplicationController
 
   def index
     @movies = Movie.all
+    
+    # HW 2-1B params[:sort] from index.html.haml
+    # figured out what to do from rdb + Google!
+    if params[:sort]      
+      @movies = Movie.order(params[:sort])    
+    end
+    
   end
 
   def new

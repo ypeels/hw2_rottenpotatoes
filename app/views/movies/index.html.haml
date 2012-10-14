@@ -4,10 +4,20 @@
 %table#movies
   %thead
     %tr
-      %th= link_to "Movie Title", movies_path, :id => "title_header"
+    
+      -# HW 2-1 Part B first hint
+      -# Arguments to movies_path is accessible in params in MoviesController#index
+      %th= link_to "Movie Title", movies_path(:sort => "title"), :id => "title_header"
+      -#%th Movie Title
+	  
       %th Rating
-      %th Release Date
+	  
+      -# HW 2-1 Part B
+      %th= link_to "Release Date", movies_path(:sort => "release_date"), :id => "release_date_header"
+      -# %th Release Date
+      
       %th More Info
+	  
   %tbody
     - @movies.each do |movie|
       %tr
