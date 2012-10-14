@@ -4,4 +4,7 @@
 
 require File.expand_path('../config/application', __FILE__)
 
+# need this line at home? do i have a broken environment? oh well...
+require 'rake/dsl_definition'
+
 Rottenpotatoes::Application.load_tasks
