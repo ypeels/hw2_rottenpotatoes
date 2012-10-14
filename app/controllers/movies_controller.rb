@@ -12,7 +12,18 @@ class MoviesController < ApplicationController
     # HW 2-1B params[:sort] from index.html.haml
     # figured out what to do from rdb + Google!
     if params[:sort]      
-      @movies = Movie.order(params[:sort])    
+      if params[:sort] == "title"
+        @movies = Movie.order("title")
+        @title_hilite = "hilite"
+      elsif params[:sort] == "release_date"
+        @movies = Movie.order("release_date")
+        @date_hilite = "hilite"
+      else
+        # no, this persists one screen too many; don't feel like figuring out refresh logic...
+        # flash[:warning] = "Error: unsupported sort type: " + params[:sort]
+        Rails.logger.warn "Error: unsupported sort type: " + params[:sort]
+      end
+      
     end
     
   end
