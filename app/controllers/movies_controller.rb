@@ -7,6 +7,8 @@ class MoviesController < ApplicationController
   end
 
   def index
+  
+    # INITIALIZE to default: all movies (inefficient, because of re-query? meh)
     @movies = Movie.all
     
     # HW 2-1B params[:sort] from index.html.haml
@@ -24,7 +26,32 @@ class MoviesController < ApplicationController
         # flash[:warning] = "Error: unsupported sort type: " + params[:sort]
         Rails.logger.warn "Error: unsupported sort type: " + params[:sort]
       end
+    end
+    
+    # HW2-2 - pump possible ratings from Model (app/models/movie.rb) to View
+    @all_ratings = Movie.all_ratings
+    
+    # HW2-2 - "Refresh" clicked with at least one rating checked    
+    @rating_checked = {}
+    if params[:ratings] != nil
+      all_checked_ratings = params[:ratings].keys
       
+      # persist checks after Refresh...(hmmm)
+      all_checked_ratings.each { |rating| @rating_checked[rating] = true }
+
+      # display only movies with checked ratings      
+      @movies = Movie.find( :all, :conditions => {:rating => all_checked_ratings} )
+     # debugger
+#      @movies = []
+#      params[:ratings].keys.each do |rating| 
+#        @movies << Movie.find(:all, :conditions => { :rating => "#{rating}" } )
+#      end
+     
+
+
+    else
+      # boundary case: toggle all checkboxes by default (or if all unchecked
+      @all_ratings.each { |rating| @rating_checked[rating] = true }
     end
     
   end
