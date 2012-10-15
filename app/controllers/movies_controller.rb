@@ -27,9 +27,12 @@ class MoviesController < ApplicationController
   
     # initial value for hash shared by HW2-1 (title/date sort) and HW2-2 (rating filter)
     options = {}
-    fresh_index = !params[:sort] && !params[:ratings]
+    #fresh_index = !params[:sort] && !params[:ratings]
     
     # this all doesn't look very good, since all my code is in the CONTROLLER (Movie itself is pretty barren)
+    # idea (2012-10-15): move as much as possible into Movie model?!
+    # - but what about all these instance variables that live in MoviesController??
+    # - just WHAT is accessible in the model?
     
     # HW 2-1B: sort by title or date
     # params[:sort] originally from index.html.haml
@@ -53,13 +56,13 @@ class MoviesController < ApplicationController
     # HW2-2 - instance variable to carry possible ratings from Model (app/models/movie.rb) to View
     @all_ratings = Movie.all_ratings  
 
-    # HW2-2 - initialize horrible instance variable...
+    # HW2-2 - initialize horrible instance variable...a "hidden state variable", if you will...
     @rating_checked = {}
     
     # HW2-2 special case: initialize with all ratings checked.
     #if fresh_index
-    # HW2-3 modified to simply check all ratings if none were checked
-    if !params[:ratings]
+    # HW2-3 modified to simply check all ratings if none were checked, more generally
+    if params[:ratings] == nil
       @all_ratings.each { |rating| @rating_checked[rating] = true }
     end    
     
